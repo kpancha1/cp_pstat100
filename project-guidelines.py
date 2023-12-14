@@ -38,6 +38,9 @@ import pandas as pd
 import altair as alt
 from sklearn.decomposition import PCA
 import statsmodels.api as sm
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import gaussian_kde
 # disable row limit for plotting
 alt.data_transformers.disable_max_rows()
 # uncomment to ensure graphics display with pdf export
