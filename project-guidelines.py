@@ -72,3 +72,110 @@ fig1 = alt.Chart(wh_raw).mark_bar(opacity = 0.1).encode(
 
 # edit
 
+
+
+#KDE part
+Question: 
+How does 'Life Ladder' correlate with 'Log GDP per capita'?
+What impact does 'Healthy life expectancy at birth' seem to have on this relationship?
+Are there any noticeable trends or outliers?
+
+Ans:
+#Based on the scatter plot for 2022, a positive correlation between 'Log GDP per capita' and 'Life Ladder' scores is likely, indicating that higher economic status is associated with greater life satisfaction. The color variation, representing 'Healthy life expectancy at birth', suggests a connection between health and well-being, with better health outcomes often coinciding with higher GDP and life satisfaction. The spread and density of the data points reveal variations in economic and life satisfaction profiles across different countries, providing insight into the complex interplay between economic, health, and well-being factors.
+
+whr_2022 = wh_raw[wh_raw['year'] == 2022]
+
+fig2, ax = plt.subplots(figsize=(10, 6))
+sns.scatterplot(data=whr_2022, x='Log GDP per capita', y='Life Ladder', hue='Healthy life expectancy at birth', palette='viridis', s=100, ax=ax)
+ax.set_title('Relationship between GDP and Life Satisfaction in 2022')
+ax.set_xlabel('Log GDP per Capita')
+ax.set_ylabel('Life Ladder')
+
+fig2
+
+
+Question: 
+Which "Life Ladder" scores are most common across all countries?
+Which "Life Ladder" scores are rare?
+How spread out are the "Life Ladder" scores?
+Are the scores spread evenly or irregularly across the dataset?
+
+Ans:
+The histogram shows a range of life satisfaction scores across various countries, with the KDE providing a smooth representation of this distribution. The  'Life Ladder' scores would be indicated from 1 to 8, showing where scores are concentrated. The spread of the 'Life Ladder' scores from the width of the histogram and the KDE curve, tells  single-peaked distribution would indicate more uniformity in life satisfaction levels.
+
+data = wh_raw['Life Ladder']
+
+fig3, ax = plt.subplots(figsize=(10, 6))
+sns.histplot(data, bins=np.arange(data.min(), data.max(), 0.03), stat='density', kde=False, color='blue', alpha=0.6, label='Histogram', ax=ax)
+
+density = gaussian_kde(data)
+xs = np.linspace(data.min(), data.max(), 300)
+density.covariance_factor = lambda : .25
+density._compute_covariance()
+
+ax.plot(xs, density(xs), color='black', label='KDE')
+
+ax.set_title('Density Scale Histogram with KDE for Life Ladder Scores')
+ax.set_xlabel('Life Ladder Score')
+ax.set_ylabel('Density')
+ax.legend()
+
+fig3
+
+
+fig4, ax = plt.subplots(figsize=(12, 8))
+sns.histplot(wh_raw['Life Ladder'], bins=30, stat='density', kde=False, color='skyblue', alpha=0.6, label='Histogram', ax=ax)
+
+kde_density = gaussian_kde(wh_raw['Life Ladder'])
+kde_xs = np.linspace(wh_raw['Life Ladder'].min(), wh_raw['Life Ladder'].max(), 300)
+kde_density.covariance_factor = lambda : .25
+kde_density._compute_covariance()
+
+ax.plot(kde_xs, kde_density(kde_xs), color='darkblue', label='KDE')
+
+ax.set_title('Global Distribution of Life Ladder Scores Over Time')
+ax.set_xlabel('Life Ladder Score')
+ax.set_ylabel('Density')
+ax.legend()
+
+fig4
+
+Question:
+Conditional Distributions of Life Satisfaction Scores Relative to GDP
+
+Ans:
+The plot has a considerable impact on the distribution of life satisfaction scores across countries, with wealthier countries tending to have higher overall life satisfaction.
+
+
+median_gdp = wh_raw['Log GDP per capita'].median()
+
+wh_raw['above_median_gdp'] = wh_raw['Log GDP per capita'] > median_gdp
+
+fig5, ax = plt.subplots(figsize=(10, 6))
+sns.kdeplot(data=wh_raw, x='Life Ladder', hue='above_median_gdp', shade=True, common_norm=False, palette=['blue', 'orange'], alpha=0.5, ax=ax)
+ax.set_title('Distribution of Life Satisfaction Scores Based on GDP per Capita')
+ax.set_xlabel('Life Ladder Score')
+ax.set_ylabel('Density')
+ax.legend(title='Above Median GDP', labels=['No', 'Yes'])
+
+fig_gdp = plt.gcf()
+
+fig5
+
+
+Question:
+Multi-panel Visualization of Life Satisfaction and GDP with Health Context
+
+Ans:
+The jointplot of 'Log GDP per capita' versus 'Life Ladder' scores, with the marginal density plots and points colored by health expectancy, suggests a nuanced relationship between economic status, health, and life satisfaction. Countries with higher GDP per capita generally appear to have higher life satisfaction scores, and this trend is more pronounced in nations with above-median healthy life expectancy. The marginal density plots reveal the distribution of GDP and life satisfaction scores separately, further emphasizing the positive correlation between economic prosperity and well-being.
+
+
+jp = sns.jointplot(data=wh_raw, x='Log GDP per capita', y='Life Ladder', hue='high_life_expectancy', kind="scatter")
+
+jp.fig.suptitle("GDP vs Life Satisfaction with Health Context", fontsize=16)
+jp.set_axis_labels('Log GDP per Capita', 'Life Ladder Score', fontsize=12)
+jp.fig.tight_layout()
+jp.fig.subplots_adjust(top=0.95) # Adjust the title position
+
+plt.show()
+
